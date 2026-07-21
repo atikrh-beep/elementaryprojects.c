@@ -1,0 +1,906 @@
+//                 UNIVERSITY COURSE REGISTRATION SYSTEM                     //
+
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<time.h>
+
+// Structure Declaration
+
+// STUDENT MANAGEMENT
+typedef struct studentmenu{
+   int id;
+   char name[30];
+   float gpa;
+   char password[20];  
+   struct studentmenu *prev;
+   struct studentmenu *next;
+}sm;
+
+  sm *studentHead = NULL;
+  sm *studentBack = NULL;
+  sm *currentStudent = NULL;
+  time_t lastStudentview = 0;
+  
+typedef struct coursemenu{
+    int id;
+    char name[30];
+    int credit;
+    int maxs;
+    int enroll;
+    struct coursemenu *prev;
+    struct coursemenu  *next;
+}cm;
+
+cm *courseHead = NULL;
+cm *courseBack = NULL;
+time_t lastCourseview = 0;
+
+typedef struct resistrationmenu{
+    int STUDENTID;
+    int COURSEID;
+    struct resistrationmenu *prev;
+    struct resistrationmenu *next;
+}rm;
+
+rm *registrationHead = NULL;
+rm *registrationBack = NULL;
+
+typedef struct teacher{
+    int id;
+    char name[30];
+    char password[20];
+    struct teacher *next;
+}tm;
+tm *teacherHead = NULL;
+
+typedef struct dropRequest{
+    int sid;
+    int cid;
+    struct dropRequest *prev;  
+    struct dropRequest *next;
+}dr;
+
+dr *dropHead = NULL;
+void Dropregi(int sid, int cid); 
+sm *findstudent(int id); 
+
+
+void studentLogin(){
+    int id;
+    char pass[20];
+
+    printf("ID: ");
+    scanf("%d",&id);
+
+    printf("Password: ");
+    scanf("%s",pass);
+
+    sm *temp = studentHead;
+
+    while(temp){
+        if(temp->id == id && strcmp(temp->password, pass) == 0){
+            currentStudent = temp;
+            return;
+        }
+        temp = temp->next;
+    }
+    currentStudent = NULL;
+}
+
+void viewMyRegistrations(int sid){
+    rm *temp = registrationHead;
+    printf("\n--- Your Registered Courses ---\n");
+    int found = 0;
+    while(temp){
+        if(temp->STUDENTID == sid){
+            cm *c = courseHead;
+            while(c && c->id != temp->COURSEID)
+                c = c->next;
+            if(c)
+                printf("Course ID: %d\n Name: %s\n Credits: %d\n", c->id, c->name, c->credit);
+            found = 1;
+        }
+        temp = temp->next;
+    }
+    if(!found) printf("No courses registered.\n");
+}
+
+
+void managingstudent(){
+    sm *Nnode = (sm*)malloc(sizeof(sm));
+    if(Nnode == NULL){
+        printf("Memory Allocation Failed\n");
+        return;
+    }
+    
+    printf("Enter ID: ");
+    scanf("%d", &Nnode->id);
+    
+    if(findstudent(Nnode->id) != NULL){
+        printf("Student ID already exists!\n");
+        free(Nnode);
+        return;
+    }
+    
+    printf("Enter Name: ");
+    getchar();  
+    scanf(" %[^\n]", Nnode->name);
+
+    printf("Enter GPA: ");
+    scanf("%f", &Nnode->gpa);
+    
+    if(Nnode->gpa < 0.0 || Nnode->gpa > 5.0){
+        printf("Invalid GPA! Must be between 0.0 and 5.0\n");
+        free(Nnode);
+        return;
+    }
+    
+    printf("Set Password: ");
+    scanf("%s", Nnode->password);
+    
+    Nnode->prev = NULL;
+    Nnode->next = studentHead;
+    
+    if(studentHead != NULL)
+        studentHead->prev = Nnode;
+    
+    studentHead = Nnode;
+
+    if(studentBack == NULL)
+        studentBack = Nnode;
+    
+   printf("Student Added Successfully!\n");
+}
+
+void savestudents(){
+    FILE *fp = fopen("DSproject.txt", "w");
+    sm *temp = studentHead;
+    while(temp){
+       fprintf(fp, "%d, %s, %.2f, %s\n", temp->id, temp->name, temp->gpa, temp->password);
+        temp=temp->next; 
+    }
+    fclose(fp);
+    }
+    
+    
+sm *findstudent(int id){
+    sm *temp = studentHead;
+    while(temp){
+        if(temp->id==id)
+        return temp;
+        temp=temp->next;
+    }
+    return NULL;
+}        
+  
+        
+void loadstudent(){
+    FILE *fp;
+    fp = fopen("DSproject.txt", "r");
+    if(fp == NULL){
+        return;
+    }
+    
+    int id;
+    char name[30];
+    float gpa;
+    char password[20]; 
+    
+    while(fscanf(fp, "%d, %[^,], %f, %s\n", &id, name, &gpa, password) == 4){
+        sm *Nnode = (sm*)malloc(sizeof(sm));
+        Nnode->id = id;
+        strcpy(Nnode->name, name);
+        Nnode->gpa = gpa;
+        strcpy(Nnode->password, password);  
+
+        Nnode->prev = studentBack;
+        Nnode->next = NULL;
+        
+        if(studentBack != NULL)
+            studentBack->next = Nnode;
+        else
+            studentHead = Nnode;
+        
+        studentBack = Nnode;
+    }
+    fclose(fp);
+}
+
+void requestDrop(int sid){
+    int cid;
+    printf("Course ID: ");
+    scanf("%d",&cid);
+
+    dr *nn = (dr*)malloc(sizeof(dr));
+    nn->sid = sid;
+    nn->cid = cid;
+    nn->next = dropHead;
+    dropHead = nn;
+
+    printf("Drop Request Sent!\n");
+}
+  
+void processingDpReq(){
+    dr *temp = dropHead;
+
+    while(temp){
+        dr *curr = temp;
+        temp = temp->next;
+
+        printf("\nStudent ID: %d\nCourse ID: %d\n", curr->sid, curr->cid);
+
+        printf("1. Approve\n2. Skip\n");
+        int ch;
+        scanf("%d",&ch);
+
+        if(ch == 1){
+            Dropregi(curr->sid, curr->cid);
+            printf("Dropped Successfully\n");
+        }
+        else{
+            printf("Skipped\n");
+        }
+
+        if(curr == dropHead)
+            dropHead = curr->next;
+
+        free(curr);
+    }
+}
+
+
+  void deleteStudent(int id){
+      sm *temp = studentHead;
+      while(temp && temp->id !=id)
+      temp=temp->next;
+      
+      if(temp == NULL){
+          printf("Student Not Found\n");
+          return;
+      }   
+      if(temp == studentHead)
+      studentHead=temp->next;
+      
+      if(temp == studentBack)
+      studentBack=temp->prev;
+      
+      if(temp->prev)
+      temp->prev->next = temp->next;
+      
+      if(temp->next)
+      temp->next->prev = temp->prev;
+      
+      free(temp);
+      }
+      
+//  COURSE MANAGEMENT
+
+void managingcourse(){
+    
+    cm *nnode = (cm*)malloc(sizeof(cm));
+    
+    if(nnode == NULL){
+        printf("Memory Allocation Failed\n");
+        return;
+    }
+    
+    printf("Enter Course ID: ");
+    scanf("%d",&nnode->id);
+    
+    cm *check = courseHead;
+    while(check){
+        if(check->id == nnode->id){
+            printf("Course ID already exists!\n");
+            free(nnode);
+            return;
+        }
+        check = check->next;
+    }
+    
+    getchar();
+    
+    printf("Enter Course Name: ");
+    scanf(" %[^\n]",nnode->name);
+    
+    printf("Enter Credits: ");
+    scanf("%d",&nnode->credit);
+    if(nnode->credit < 1 || nnode->credit > 6){
+        printf("Invalid Credits! Must be between 1 and 6\n");
+        free(nnode);
+        return;
+    }
+    
+    printf("Enter Max Students: ");
+    scanf("%d",&nnode->maxs);
+    if(nnode->maxs < 1 || nnode->maxs > 45){
+        printf("Invalid Max Students! Must be between 1 and 45\n");
+        free(nnode);
+        return;
+    }
+    
+    nnode->enroll = 0;
+    nnode->prev = NULL;
+    nnode->next = courseHead;
+    
+    if(courseHead != NULL)
+        courseHead->prev = nnode;
+    
+    courseHead = nnode;
+    
+    if(courseBack == NULL)
+        courseBack = nnode;
+
+    printf("Course Added Successfully!\n");
+}
+
+void viewStudents(){
+    sm *temp = studentHead;
+    if(temp == NULL){
+        printf("No students found!\n");
+        return;
+    }
+    int count = 0;
+    printf("\n--- Student List ---\n");
+    while(temp!=NULL){
+        printf("ID: %d\n Name: %s\n GPA: %.2f\n", temp->id, temp->name, temp->gpa);
+        temp=temp->next;
+        count++;
+    }
+    printf("Total: %d student(s)\n", count);
+    lastStudentview = time(NULL);
+}
+
+void viewCourse(){
+    cm *temp=courseHead;
+    if(temp == NULL){
+        printf("No courses found!\n");
+        return;
+    }
+    int count = 0;
+    printf("\n--- Course List ---\n");
+    while(temp!=NULL){
+        printf("ID: %d\n Name: %s\n Credits: %d\n Max: %d\n Enrolled: %d\n",
+               temp->id, temp->name, temp->credit, temp->maxs, temp->enroll);
+        temp=temp->next;
+        count++;
+    }
+    printf("Total: %d course(s)\n", count);
+    lastCourseview = time(NULL);
+}
+
+void saveCourse() {
+    FILE *fp;
+   fp = fopen("Courses.txt","w");
+   if(fp==NULL){
+     fp = fopen("Courses.txt","w");
+     return;
+   }
+       cm *temp = courseHead;
+       while(temp!=NULL){
+           fprintf(fp,"%d, %s, %d, %d, %d\n",temp->id, temp->name, temp->credit, temp->maxs, temp->enroll);
+
+             temp=temp->next;
+   }
+   fclose(fp);
+}
+
+void loadCourse(){
+    FILE *fp;
+    fp = fopen("Courses.txt","r");
+    
+    if(fp==NULL){
+        fp = fopen("Courses.txt","w");
+        return;
+    }
+    int id, credit, maxs, enroll;
+   char name[30];
+   
+   
+while(fscanf(fp, "%d, %29[^,], %d, %d, %d\n", &id, name, &credit, &maxs, &enroll) == 5){
+        cm *nnode = (cm*)malloc(sizeof(cm));
+        
+        nnode->id=id;
+        strcpy(nnode->name, name);
+        nnode->credit=credit;
+        nnode->maxs=maxs;
+        nnode->enroll=enroll;
+        
+        nnode->prev = courseBack;
+        nnode->next = NULL;
+        
+     if(courseBack!=NULL)
+         courseBack->next=nnode;
+     else
+         courseBack=nnode;
+     
+     if(courseHead==NULL)
+     courseHead=nnode;
+              courseBack=nnode;
+
+
+    }
+     fclose(fp);
+    }
+    
+   void deleteCourse(int id){
+     cm *temp = courseHead;
+     while(temp && temp->id != id)
+       temp = temp->next;
+       
+    if(temp==NULL){
+        printf("Course Not Found\n");
+        return;
+    }
+    
+    if(temp == courseHead)
+    courseHead = temp->next;
+    
+    if(temp == courseBack)
+    courseBack = temp->prev;
+    
+    if(temp->next)
+    temp->next->prev = temp->prev;
+    
+    if(temp->prev)
+    temp->prev->next = temp->next;
+    
+    free(temp);
+    }    
+       
+ 
+ void studentReport(){
+   sm *temp=studentHead;
+   
+   int count=0;
+   float totalgpa=0;
+   float maxgpa=-1;
+   char topper[30] = "";
+   
+   while(temp!=NULL){
+       count++;
+       totalgpa = totalgpa+temp->gpa;
+   
+   if(temp->gpa>maxgpa){
+       maxgpa = temp->gpa;
+       strcpy(topper, temp->name);
+   }
+   temp=temp->next;
+ }
+   printf("\n--- Student Report ---\n");
+
+   if(count == 0){
+        printf("No student data found!\n");
+        return;
+}
+
+    printf("Total Students: %d\n",count);
+    printf("Average Gpa: %f\n", totalgpa/count);
+    printf("Topper: %s [GPA: %.2f]\n", topper, maxgpa);
+}
+void courseReport(){
+    cm *temp = courseHead;
+
+    int totalCourse = 0;
+    int totalEnroll = 0;
+
+    int maxEnroll = -1;
+    char popularCourse[30];
+
+    while(temp!=NULL){
+        totalCourse++;
+        totalEnroll = totalEnroll+temp->enroll;
+
+    if(temp->enroll>maxEnroll){
+        maxEnroll = temp->enroll;
+        strcpy(popularCourse, temp->name);
+    }
+        temp=temp->next;
+    }
+    printf("\n--- Course Report ---\n");
+
+    if(totalCourse == 0){
+        printf("No course data found!\n");
+        return;
+    }
+
+    printf("Total Courses: %d\n", totalCourse);
+    printf("Total Enrollments: %d\n", totalEnroll);
+    printf("Most Popular Course: %s (%d students)\n", popularCourse, maxEnroll);
+}
+ 
+ void reportMenu(){
+     int option = 0;
+     
+     while(option!=3){
+         
+        printf("\n--- Reports Menu ---\n");
+        printf("1. Student Report\n");
+        printf("2. Course Report\n");
+        printf("3. Back\n");
+        
+        printf("Enter Option: ");
+        scanf("%d",&option);
+        getchar();
+        
+        switch(option){
+            case 1:
+            studentReport();
+            break;
+            
+            case 2:
+            courseReport();
+            break;
+            
+            case 3:
+            printf("Returning to Main Menu...\n");
+            break;
+            
+            default:
+            printf("Inavlid Choice!\n");
+            
+        }
+       }
+      }
+   
+   void regiCourse(){
+       int sid, cid;
+       printf("Enter Student ID: ");
+       scanf("%d",&sid);
+       getchar();
+       printf("Enter Course ID: ");
+       scanf("%d",&cid);
+       getchar();
+       sm *s = findstudent(sid);
+       cm *c = courseHead;
+       
+       
+       while(c && c->id != cid)
+       c = c->next;
+       
+       if(!c || !s || c->enroll >= c->maxs){
+           printf("Registration Failed\n");
+           return;
+       }
+       rm *check = registrationHead;
+       while(check){
+           if(check -> STUDENTID == sid && check-> COURSEID == cid){
+               printf("Already Registered!\n");
+               return;
+           }
+           check = check->next;
+       }
+       rm *nn = (rm*)malloc(sizeof(rm));
+       nn->STUDENTID = sid;
+       nn->COURSEID = cid;
+       nn->next = NULL;
+       nn->prev = registrationBack;
+       
+       if(registrationBack){
+          registrationBack->next = nn; 
+       }else{
+           registrationHead = nn;
+       }
+       registrationBack = nn;
+       c->enroll++;
+       printf("Rgistration Successful.\n");
+   }
+   
+   void saveRegistration(){
+    FILE *fp = fopen("Registration.txt", "w");
+    rm *temp = registrationHead;
+    while(temp){
+        fprintf(fp, "%d, %d\n", temp->STUDENTID, temp->COURSEID);
+        temp = temp->next;
+    }
+    fclose(fp);
+}
+   
+   void loadRegistration(){
+    FILE *fp = fopen("Registration.txt","r");
+
+    if(fp == NULL){
+        return;
+    }
+
+    int sid, cid;
+
+    while(fscanf(fp, "%d, %d", &sid, &cid) == 2){
+        rm *nn = (rm*)malloc(sizeof(rm));
+
+        nn->STUDENTID = sid;
+        nn->COURSEID = cid;
+
+        nn->next = NULL;
+        nn->prev = registrationBack;
+
+        if(registrationBack != NULL){
+            registrationBack->next = nn;
+        } else {
+            registrationHead = nn;
+        }
+
+        registrationBack = nn;
+    }
+
+    fclose(fp);
+}
+    
+ void Dropregi(int sid, int cid){
+    rm *temp = registrationHead;
+
+    while(temp != NULL){
+        if(temp->STUDENTID == sid && temp->COURSEID == cid)
+            break;
+        temp = temp->next;
+    }
+
+    if(temp == NULL){
+        printf("Registration Not Found\n");
+        return;
+    }
+
+    if(temp == registrationHead)
+        registrationHead = temp->next;
+
+    if(temp == registrationBack)
+        registrationBack = temp->prev;
+
+    if(temp->next != NULL)
+        temp->next->prev = temp->prev;
+
+    if(temp->prev != NULL)
+        temp->prev->next = temp->next;
+
+    cm *t = courseHead;
+    while(t && t->id != cid)
+        t = t->next;
+
+    if(t != NULL && t->enroll > 0)
+        t->enroll--;
+     saveRegistration(); 
+    free(temp);
+}
+
+
+void showLastview(){
+          printf("\n--- Last Viewed Info ---\n");
+    if(lastStudentview != 0){
+        printf("Students last viewed at: %s", ctime(&lastStudentview));
+    } else {
+        printf("Students never viewed yet.\n");
+    }
+    if(lastCourseview != 0){
+        printf("Courses last viewed at: %s", ctime(&lastCourseview));
+    } else {
+        printf("Courses never viewed yet.\n");
+    }
+      }
+    
+   void adminPanel(){
+    int choice;
+    while(1){
+        printf("\n--- ADMIN PANEL ---\n");
+        printf("1. Add Student\n");
+        printf("2. View Students\n");
+        printf("3. Delete Student\n");
+        printf("4. Add Course\n");
+        printf("5. View Course\n");
+        printf("6. Delete Course\n");
+        printf("7. Process Drop Requests\n");
+        printf("8. Reports\n");
+        printf("9. Last Viewed Info\n");  
+        printf("10. Logout\n");         
+        printf("Enter Choice: ");
+        scanf("%d", &choice);
+        switch(choice){
+            case 1: 
+            managingstudent();
+            break;
+            
+            case 2: 
+            viewStudents();
+            break;
+            
+            case 3: {
+                int id;
+                printf("Enter Student ID: ");
+                scanf("%d",&id);
+                deleteStudent(id);
+                break;
+            }
+            case 4: 
+            managingcourse(); 
+            break;
+            
+            case 5: 
+            viewCourse(); 
+            break;
+            
+            case 6: {
+                int id;
+                printf("Enter Course ID: ");
+                scanf("%d",&id);
+                deleteCourse(id);
+                break;
+            }
+            case 7: 
+            processingDpReq(); 
+            break;
+            
+            case 8: 
+            reportMenu(); 
+            break;
+            
+            case 9: 
+            showLastview(); 
+            break;
+            
+            case 10:        
+            return;
+            
+            default:
+            printf("Invalid Choice! Try again.\n");
+            break;
+            
+        }
+    }
+}
+
+void adminLogin(){
+    char pass[20];
+    printf("Enter Admin Password: ");
+    scanf("%s", pass);
+    if(strcmp(pass, "admin123") == 0){
+        adminPanel();
+    } else {
+        printf("Wrong Password!\n");
+    }
+}
+
+
+void regiCourseByStu(int sid)
+{
+    if(currentStudent == NULL){
+        printf("No student logged in\n");
+        return;
+    }
+
+    int cid;
+    printf("Enter Course ID: ");
+    scanf("%d", &cid);
+
+    cm *c = courseHead;
+
+    while(c && c->id != cid)
+        c = c->next;
+
+    if(c == NULL){
+        printf("Course not found\n");
+        return;
+    }
+
+    if(c->enroll >= c->maxs){
+        printf("Course is full\n");
+        return;
+    }
+
+    rm *check = registrationHead;
+    while(check){
+        if(check->STUDENTID == sid && check->COURSEID == cid){
+            printf("Already Registered!\n");
+            return;
+        }
+        check = check->next;
+    }
+
+    rm *nn = (rm*)malloc(sizeof(rm));
+    if(nn == NULL){
+        printf("Memory allocation failed\n");
+        return;
+    }
+
+    nn->STUDENTID = sid;
+    nn->COURSEID = cid;
+    nn->next = NULL;
+    nn->prev = registrationBack;
+
+    if(registrationBack)
+        registrationBack->next = nn;
+    else
+        registrationHead = nn;
+
+    registrationBack = nn;
+
+    c->enroll++;
+    saveRegistration(); 
+    printf("Registration Successful.\n");
+}
+
+
+int main() {
+    int option;
+
+    loadstudent();
+    loadCourse();
+    loadRegistration();
+
+    while (1) {
+          printf("\n====================================================\n");
+        printf("        UNIVERSITY COURSE REGISTRATION SYSTEM        \n");
+        printf("====================================================\n");
+
+        printf("1. Teacher Login\n");
+        printf("2. Student Login\n");
+        printf("3. Exit\n");
+
+        printf("Enter Choice: ");
+        scanf("%d", &option);
+
+        switch(option){
+
+            case 1:
+         adminLogin();
+         break;
+case 2:
+    studentLogin();  
+    if(currentStudent){
+        printf("Login Successful!\n");
+        int ch;
+        while(1){
+            printf("\n------ STUDENT PANEL ------\n");
+            printf("1. View Courses\n");
+            printf("2. Register Course\n");
+            printf("3. Request Drop Course\n");
+            printf("4. My Registered Courses\n"); 
+            printf("5. Logout\n");               
+            printf("Enter Choice: ");
+            scanf("%d",&ch);
+            switch(ch){
+                case 1:
+                    viewCourse();
+                    break;
+                    
+                case 2:
+                    regiCourseByStu(currentStudent->id);
+                    break;
+                    
+                case 3:
+                    requestDrop(currentStudent->id);
+                    break;
+                    
+                case 4: 
+                    viewMyRegistrations(currentStudent->id); 
+                    break;  
+                    
+                case 5:
+                    currentStudent = NULL;
+                    printf("Logged out successfully!\n");
+                    break;
+                
+                default:
+                    printf("Invalid Choice!\n");
+            }
+            if(ch == 5) break;
+        }
+    } else {
+        printf("Invalid ID or Password!\n");
+    }
+    break;
+    
+    
+            case 3:
+                savestudents();
+                saveCourse();
+                saveRegistration();
+                printf("\nData saved. Exiting...\n");
+                exit(0);
+
+            default:
+                printf("Invalid Choice! Try again.\n");
+        }
+    }
+
+    return 0;
+}
