@@ -1,0 +1,406 @@
+#include<stdio.h>
+#include<string.h>
+struct route {
+    char from[50];
+    char to[50];
+};
+struct bus {
+    char name[50];
+    int total_seat;
+    int available_seat;
+    struct route info;
+    char date[50];
+    char time[50];
+};
+int main()
+{
+    struct route route_1={"DHAKA","RANGPUR"};
+    struct route route_2={"DHAKA","BARISHAL"};
+    struct route route_3={"DHAKA","CHITTAGONG"};
+    struct route route_4={"DHAKA","SYLHET"};
+
+    struct bus bus_1={"SR Travels",48,48,route_1,"24 DECEMBER","10:00 AM"};
+    struct bus bus_2={"SR Travels",48,48,route_2,"25 DECEMBER","12:00 PM"};
+    struct bus bus_3={"SR Travels",48,48,route_3,"3 JULY","03:00 PM"};
+    struct bus bus_4={"SR Travels",48,48,route_4,"4 JULY","06:00 PM"};
+
+    int option_1;
+    printf("-----------   WELCOME TO BUS RESERVATION SYSTEM   --------------\n\n");
+    printf("MAIN MENU:\n\n 1. Bus Schedule.\n 2. Seat Reservation. \n 3. Seat Cancel.\n\n");
+    printf("Please Select a Option: ");
+    scanf("%d",&option_1);
+    printf("\n");
+    printf("------------------------------------\n");
+    printf("\n");
+
+    char user_pickup_point[50];
+    char user_arival_point[50];
+    char user_date[50];
+    if (option_1==1)
+    {
+
+        printf("SELECT ROUTE AND TIME\n\n");
+        printf("FROM : ");
+        scanf("%s",user_pickup_point);
+        printf("TO   : ");
+        scanf("%s",user_arival_point);
+        printf("DATE : ");
+        scanf(" %[^\n]",user_date);
+        printf("\n");
+
+        if (strcmp(user_pickup_point,route_1.from) == 0 &&
+            strcmp(user_arival_point,route_1.to) == 0 &&
+            strcmp(user_date,bus_1.date) == 0 )
+        {
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("MATCH FOUND!!\n\n");
+            printf("FROM %s to %s\n",route_1.from,route_1.to);
+            printf("DATE : %s\n",bus_1.date);
+            printf("TOTAL SEAT : %d\n",bus_1.total_seat);
+            printf("AVAILABLE SEAT : %d\n",bus_1.available_seat);
+            printf("TIME : %s\n\n",bus_1.time);
+            printf("------------------------------------\n");
+        }
+
+        else if (strcmp(user_pickup_point,route_2.from) == 0 &&
+            strcmp(user_arival_point,route_2.to) == 0 &&
+            strcmp(user_date,bus_2.date) == 0 )
+        {
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("MATCH FOUND!!\n\n");
+            printf("FROM %s to %s\n",route_2.from,route_2.to);
+            printf("DATE : %s\n",bus_2.date);
+            printf("TOTAL SEAT : %d\n",bus_2.total_seat);
+            printf("AVAILABLE SEAT : %d\n",bus_2.available_seat);
+            printf("TIME : %s\n\n",bus_2.time);
+            printf("------------------------------------\n");
+        }
+
+        else if (strcmp(user_pickup_point,route_3.from) == 0 &&
+            strcmp(user_arival_point,route_3.to) == 0 &&
+            strcmp(user_date,bus_3.date) == 0 )
+        {
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("MATCH FOUND!!\n\n");
+            printf("FROM %s to %s\n",route_3.from,route_3.to);
+            printf("DATE : %s\n",bus_3.date);
+            printf("TOTAL SEAT : %d\n",bus_3.total_seat);
+            printf("AVAILABLE SEAT : %d\n",bus_3.available_seat);
+            printf("TIME : %s\n\n",bus_3.time);
+            printf("------------------------------------\n");
+        }
+
+
+        else if (strcmp(user_pickup_point,route_4.from) == 0 &&
+            strcmp(user_arival_point,route_4.to) == 0 &&
+            strcmp(user_date,bus_4.date) == 0 )
+        {
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("MATCH FOUND!!\n\n");
+            printf("FROM %s to %s\n",route_4.from,route_4.to);
+            printf("DATE : %s\n",bus_4.date);
+            printf("TOTAL SEAT : %d\n",bus_4.total_seat);
+            printf("AVAILABLE SEAT : %d\n",bus_4.available_seat);
+            printf("TIME : %s\n\n",bus_4.time);
+            printf("------------------------------------\n");
+        }
+
+        else
+        {
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("SORRY THERE AIN'T ANY BUS FOUND AS PER YOUR NEED\n");
+            printf("\n------------------------------------\n");
+        }
+        }
+
+       else if (option_1==2)
+       {
+       int seat_needed;
+       int price=500;
+
+       printf("Enter Route and Date for Reservation : \n");
+       printf("From : ");
+       scanf("%s",user_pickup_point);
+       printf("To   : ");
+       scanf("%s",user_arival_point);
+       printf("Date : ");
+       scanf(" %[^\n]", user_date);
+       printf("\n");
+
+       if(strcmp(user_pickup_point,route_1.from)==0 &&
+       strcmp(user_arival_point,route_1.to)==0 &&
+       strcmp(user_date,bus_1.date)==0)
+       {
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Seats Available:\n");
+            printf("From %s To %s\n",route_1.from,route_1.to);
+            printf("Date : %s\n",bus_1.date);
+            printf("Time : %s\n\n",bus_1.time);
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Available Seats : %d\n",bus_1.available_seat);
+            printf("Please select the number of seats: ");
+            scanf("%d",&seat_needed);
+            printf("Standard Ticket Fare: 500 BDT");
+            printf("\n\n");
+            printf("Please Press Enter for Purchasing....");
+            getchar();
+            getchar();
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Total Amount: %d BDT\n",price*seat_needed);
+            printf("Remaining Seats: %d\n", bus_1.available_seat-seat_needed);
+            printf("Purchase Successful.\n");
+       }
+       else if(strcmp(user_pickup_point,route_2.from)==0 &&
+       strcmp(user_arival_point,route_2.to)==0 &&
+       strcmp(user_date,bus_2.date)==0)
+       {
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Seats Available:\n");
+            printf("From %s To %s\n",route_2.from,route_2.to);
+            printf("Date : %s\n",bus_2.date);
+            printf("Time : %s\n\n",bus_2.time);
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Available Seats : %d\n",bus_2.available_seat);
+            printf("Please select the number of seats: ");
+            scanf("%d",&seat_needed);
+            printf("Standard Ticket Fare: 500 BDT");
+            printf("\n\n");
+            printf("Please Press Enter for Purchasing....");
+            getchar();
+            getchar();
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Total Amount: %d BDT\n",price*seat_needed);
+            printf("Remaining Seats: %d\n", bus_2.available_seat-seat_needed);
+            printf("Purchase Successful.\n");
+       }
+       else if(strcmp(user_pickup_point,route_3.from)==0 &&
+       strcmp(user_arival_point,route_3.to)==0 &&
+       strcmp(user_date,bus_3.date)==0)
+       {
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Seats Available:\n");
+            printf("From %s To %s\n",route_3.from,route_3.to);
+            printf("Date : %s\n",bus_3.date);
+            printf("Time : %s\n\n",bus_3.time);
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Available Seats : %d\n",bus_3.available_seat);
+            printf("Please select the number of seats: ");
+            scanf("%d",&seat_needed);
+            printf("Standard Ticket Fare: 500 BDT");
+            printf("\n\n");
+            printf("Please Press Enter for Purchasing....");
+            getchar();
+            getchar();
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Total Amount: %d BDT\n",price*seat_needed);
+            printf("Remaining Seats: %d\n", bus_3.available_seat-seat_needed);
+            printf("Purchase Successful.\n");
+       }
+       else if(strcmp(user_pickup_point,route_4.from)==0 &&
+       strcmp(user_arival_point,route_4.to)==0 &&
+       strcmp(user_date,bus_4.date)==0)
+       {
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Seats Available:\n");
+            printf("From %s To %s\n",route_4.from,route_4.to);
+            printf("Date : %s\n",bus_4.date);
+            printf("Time : %s\n\n",bus_4.time);
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Available Seats : %d\n",bus_4.available_seat);
+            printf("Please select the number of seats: ");
+            scanf("%d",&seat_needed);
+            printf("Ticket Cost : %d\n",price*seat_needed);
+            printf("\n\n");
+            printf("Please Press Enter for Purchasing....");
+            getchar();
+            getchar();
+            printf("------------------------------------\n");
+            printf("\n");
+            printf("Total Amount: %d\n",price*seat_needed);
+            printf("Remaining Seats: %d\n", bus_4.available_seat-seat_needed);
+            printf("Purchase Successful.\n");
+       }
+    else{
+        printf("\nSorry, No Seats Available\n");
+    }
+    }
+    else if (option_1==3)
+    {
+        int reserve_seat;
+        int ticket_price=500;
+        int cancel_seat;
+        int refund_amount;
+        printf("For Seat Cancellation Complete below Instructions.");
+        printf("SELECT ROUTE AND TIME\n\n");
+        printf("FROM : ");
+        scanf("%s",user_pickup_point);
+        printf("TO   : ");
+        scanf("%s",user_arival_point);
+        printf("DATE : ");
+        scanf(" %[^\n]",user_date);
+        printf("\n");
+
+        if(strcmp(user_pickup_point,route_1.from)==0 &&
+        strcmp(user_arival_point,route_1.to)==0 &&
+        strcmp(user_date,bus_1.date)==0){
+        printf("------------------------------------\n");
+        printf("\n");
+        printf("Total Reserved Seat: ");
+        scanf("%d",&reserve_seat);
+        printf("Total purchased amount: %d\n",reserve_seat*500);
+        printf("\n");
+        printf("------------------------------------\n");
+        printf("\n");
+        if(reserve_seat>0){
+        printf("How many seats would you like to cancel: ");
+        scanf("%d",&cancel_seat);
+        if(cancel_seat<=reserve_seat){
+            bus_1.available_seat+=cancel_seat;
+            refund_amount=cancel_seat*ticket_price;
+            printf("Total Cancelled Seats: %d\n",cancel_seat);
+            printf("Refund amount: %d\n",refund_amount);
+            printf("Please confirm cancellation\n");
+            getchar();
+            getchar();
+            printf("\n\n");
+            printf("Cancellation Successful.\n");
+            printf("Thank You.\n");
+
+        }
+      else{
+            printf("Invalid Cancellation Amount.\n");
+       }
+       }
+      else{
+            printf("\nNO matching booking found for cancellation\n");
+       }
+       }
+      else if(strcmp(user_pickup_point,route_2.from)==0 &&
+        strcmp(user_arival_point,route_2.to)==0 &&
+        strcmp(user_date,bus_2.date)==0){
+        printf("------------------------------------\n");
+        printf("\n");
+        printf("Total Reserved Seat: ");
+        scanf("%d",&reserve_seat);
+        printf("Total purchased amount: %d\n",reserve_seat*500);
+        printf("\n");
+        printf("------------------------------------\n");
+        printf("\n");
+        if(reserve_seat>0){
+        printf("How many seats would you like to cancel: ");
+        scanf("%d",&cancel_seat);
+        if(cancel_seat<=reserve_seat){
+            bus_1.available_seat+=cancel_seat;
+            refund_amount=cancel_seat*ticket_price;
+            printf("Total Cancelled Seats: %d\n",cancel_seat);
+            printf("Refund amount: %d\n",refund_amount);
+            printf("Please confirm cancellation\n");
+            getchar();
+            getchar();
+            printf("\n\n");
+            printf("Cancellation Successful.\n");
+            printf("Thank You.\n");
+
+        }
+      else{
+            printf("Invalid Cancellation Amount.\n");
+       }
+       }
+      else{
+            printf("\nNO matching booking found for cancellation\n");
+       }
+       }
+       else if(strcmp(user_pickup_point,route_3.from)==0 &&
+        strcmp(user_arival_point,route_3.to)==0 &&
+        strcmp(user_date,bus_3.date)==0){
+        printf("------------------------------------\n");
+        printf("\n");
+        printf("Total Reserved Seat: ");
+        scanf("%d",&reserve_seat);
+        printf("Total purchased amount: %d\n",reserve_seat*500);
+        printf("\n");
+        printf("------------------------------------\n");
+        printf("\n");
+        if(reserve_seat>0){
+        printf("How many seats would you like to cancel: ");
+        scanf("%d",&cancel_seat);
+        if(cancel_seat<=reserve_seat){
+            bus_1.available_seat+=cancel_seat;
+            refund_amount=cancel_seat*ticket_price;
+            printf("Total Cancelled Seats: %d\n",cancel_seat);
+            printf("Refund amount: %d\n",refund_amount);
+            printf("Please confirm cancellation\n");
+            getchar();
+            getchar();
+            printf("\n\n");
+            printf("Cancellation Successful.\n");
+            printf("Thank You.\n");
+
+        }
+      else{
+            printf("Invalid Cancellation Amount.\n");
+       }
+       }
+      else{
+            printf("\nNO matching booking found for cancellation\n");
+       }
+       }
+       else if(strcmp(user_pickup_point,route_4.from)==0 &&
+        strcmp(user_arival_point,route_4.to)==0 &&
+        strcmp(user_date,bus_4.date)==0){
+        printf("------------------------------------\n");
+        printf("\n");
+        printf("Total Reserved Seat: ");
+        scanf("%d",&reserve_seat);
+        printf("Total purchased amount: %d\n",reserve_seat*500);
+        printf("\n");
+        printf("------------------------------------\n");
+        printf("\n");
+        if(reserve_seat>0){
+        printf("How many seats would you like to cancel: ");
+        scanf("%d",&cancel_seat);
+        if(cancel_seat<=reserve_seat){
+            bus_1.available_seat+=cancel_seat;
+            refund_amount=cancel_seat*ticket_price;
+            printf("Total Cancelled Seats: %d\n",cancel_seat);
+            printf("Refund amount: %d\n",refund_amount);
+            printf("Please confirm cancellation\n");
+            getchar();
+            getchar();
+            printf("\n\n");
+            printf("Cancellation Successful.\n");
+            printf("Thank You.\n");
+
+        }
+      else{
+            printf("Invalid Cancellation Amount.\n");
+       }
+       }
+      else{
+            printf("\nNO matching booking found for cancellation\n");
+       }
+       }
+       }
+      else
+         {
+           printf("Invalid Option Choose option between(1/2/3): ");
+           scanf("%d",&option_1);
+         }
+return 0;
+}
