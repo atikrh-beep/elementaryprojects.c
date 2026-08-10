@@ -1,0 +1,511 @@
+#include <stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+#define MAX_LOACTIONS 100
+#define NAME_SIZE 50
+
+typedef struct edge{
+    int destination;
+    double distance;
+    double time;
+    double cost;
+    int traffic;
+    int weather;
+    int blocked;
+    
+    struct edge *next;
+}edge;
+
+typedef struct Location{
+    char name[NEMAE_SIZE];
+    edge *roads;
+}Location;
+
+Location graph[MAX_LOACTIONS];
+int locationcount = 0;
+
+void addlocation(char name[]){
+    if(locationcount >= MAX_LOCATIONS){
+        printf("Location limit exceed!\n");
+        return;
+    }
+    
+    strcpy(graph[locationcount].name,name);
+    graph[locationcount].roads = NULL:
+    locationcount++;
+   // prinf("Location Added Successfull\n");
+}
+
+  int searchLocation(char name[]){
+    for (int i=0; i<locationCount;i++){
+        if(strcmp(graph[i].name, name) == 0){
+            return i;
+        }
+    }
+    return -1;
+ }
+ 
+ void displayLocations(){
+    printf("\n========== LOCATIONS ==========\n");
+    for (int i=0; i<locationCount; i++){
+        printf("%d. %s\n", i+1, graph[i].name);
+    }
+ }
+
+  void addRoad(char from[],char to[],double distance,double time,double cost){
+
+    int u = searchLocation(from);
+    int v = searchLocation(to);
+
+    if (u==-1 || v==-1){
+        printf("Location not found!\n");
+        return;
+    }
+
+   edge *road = (edge*)malloc(sizeof(edge));
+
+    road->destination = v;
+    road->distance = distance;
+    road->time = time;
+    road->cost = cost;
+    road->traffic = 1;     
+    road->weather = 1;     
+    road->blocked = 0;    
+    road->next = graph[u].roads;
+    graph[u].roads = road;
+
+ edge *reverseRoad = (edge*)malloc(sizeof(edge));
+
+    reverseRoad->destination = u;
+    reverseRoad->distance = distance;
+    reverseRoad->time = time;
+    reverseRoad->cost = cost;
+    reverseRoad->traffic = 1;
+    reverseRoad->weather = 1;
+    reverseRoad->blocked = 0;
+    reverseRoad->next = graph[v].roads;
+    graph[v].roads = reverseRoad;
+
+   // printf("Road added successfully.\n");
+}
+
+void removeRoad(char from[], char to[]){
+    int u = searchLocation(from);
+    int v = searchLocation(to);
+    if (u==-1 || v==-1){
+        printf("Location not found!\n");
+        return;
+    }
+
+    edge *current = graph[u].roads;
+    edge *previous = NULL;
+    while (current != NULL){
+        if (current->destination == v){
+            if (previous == NULL){
+                graph[u].roads = current->next;
+            }
+            else{
+                previous->next = current->next;
+            }
+
+            free(current);
+            break;
+        }
+
+        previous = current;
+        current = current->next;
+    }
+
+    current = graph[v].roads;
+    previous = NULL;
+    while (current != NULL){
+        if (current->destination == u){
+            if (previous == NULL){
+                graph[v].roads = current->next;
+            }
+            else{
+                previous->next = current->next;
+            }
+
+            free(current);
+            break;
+        }
+
+        previous = current;
+        current = current->next;
+    }
+
+    printf("Road removed successfully!\n");
+}
+
+void removeLocation(char name[]){
+    int index = searchLocation(name);
+    if (index == -1){
+        printf("Location not found!\n");
+        return;
+    }
+    for (int i = 0; i < locationCount; i++){
+        edge *current = graph[i].roads;
+        edge *previous = NULL;
+      while (current != NULL){
+        if (current->destination == index){
+           edge *temp = current;
+              if (previous == NULL){
+                  graph[i].roads = current->next;
+          }
+          else{
+            previous->next = current->next;
+          }
+      current = current->next;
+       free(temp);
+            }
+            else{
+                previous = current;
+                current = current->next;
+            }
+        }
+    }
+
+    edge *current = graph[index].roads;
+    while (current != NULL){
+        Edge *temp = current;
+        current = current->next;
+        free(temp);
+    }
+  for (int i = index; i < locationCount - 1; i++){
+        graph[i] = graph[i + 1];
+    }
+    locationCount--;
+    
+    for (int i = 0; i < locationCount; i++){
+        Edge *road = graph[i].roads;
+        while (road != NULL){
+            if (road->destination > index){
+                road->destination--;
+            }
+            road = road->next;
+        }
+    }
+    printf("Location removed successfully!\n");
+}
+
+  void displayRoads(){
+    printf("\n========== ROAD NETWORK ==========\n");
+    for (int i=0; i<locationCount; i++){
+    
+        printf("\n%s:\n",graph[i].name);
+        
+        edge *current = graph[i].roads;
+        while (current != NULL){
+   printf("%s", graph[current->destination].name);
+   printf("Distance: %.2lf km",current->distance);
+   printf("Time: %.2lf min",current->time);
+   printf("Cost: %.2lf",current->cost);
+   printf("Traffic: %d",current->traffic);
+   printf("Weather: %d",current->weather);
+   printf("Status: ");
+
+     if (current->blocked){
+          printf("BLOCKED");
+          
+    }else{
+          printf("OPEN");
+          
+    }
+          printf("\n");
+          current = current->next;
+        }
+      printf("\n");    
+    }
+}
+
+void BFS(int start){
+    int visited[MAX_LOCATIONS] = {0};
+    int queue[MAX_LOCATIONS];
+    int front = 0;
+    int rear = 0;
+
+    queue[rear] = start;
+    rear++;
+
+    visited[start] = 1;
+    printf("\nBFS Traversal:\n");
+    while (front < rear){
+        int current = queue[front];
+        front++;
+
+        printf("%s", graph[current].name);
+
+        edge *road = graph[current].roads;
+        while (road != NULL){
+            int next = road->destination;
+       if (visited[next] == 0 && road->blocked == 0){
+           visited[next] = 1;
+           queue[rear] = next;
+           rear++;
+    }
+    road = road->next;
+        }
+        if (front < rear){
+            printf(" -> ");
+        }
+    }
+    printf("\n");
+}
+
+  void locationMenu(){
+    int choice;
+    while (1){
+        printf("\n===== LOCATION MANAGEMENT =====\n");
+        printf("1. Add Location\n");
+        printf("2. Remove Location\n");
+        printf("3. Search Location\n");
+        printf("4. Display Locations\n");
+        printf("5. Back\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+        
+        if (choice == 1){
+            char name[NAME_SIZE];
+            printf("Enter location name: ");
+            scanf(" %[^\n]", name);
+            addLocation(name);
+        }
+        else if (choice == 2){
+            char name[NAME_SIZE];
+            
+            printf("Enter location name: ");
+            scanf(" %[^\n]", name);
+
+            removeLocation(name);
+        }
+        else if (choice == 3){
+            char name[NAME_SIZE];
+
+            printf("Enter location name: ");
+            scanf(" %[^\n]", name);
+
+            int result = searchLocation(name);
+
+            if (result == -1){
+                printf("Location not found!\n");
+            }
+            else{
+                printf("Location found: %s\n",
+                       graph[result].name);
+            }
+        }
+
+        else if (choice == 4){
+            displayLocations();
+        }
+
+        else if (choice == 5){
+            break;
+        }
+        else{
+            printf("Invalid choice!\n");
+        }
+    }
+}
+ void roadMenu(){
+    int choice;
+    while (1){
+        printf("\n===== ROAD MANAGEMENT =====\n");
+        printf("1. Add Road\n");
+        printf("2. Remove Road\n");
+        printf("3. Display Roads\n");
+        printf("4. Back\n");
+
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+
+        if (choice == 1){
+            char from[NAME_SIZE];
+            char to[NAME_SIZE];
+            double distance;
+            double time;
+            double cost;
+
+            printf("From: ");
+            scanf(" %[^\n]", from);
+
+            printf("To: ");
+            scanf(" %[^\n]", to);
+
+            printf("Distance (km): ");
+            scanf("%lf", &distance);
+
+            printf("Time (minutes): ");
+            scanf("%lf", &time);
+
+            printf("Cost: ");
+            scanf("%lf", &cost);
+
+            addRoad(from, to, distance, time, cost);
+        }
+
+        else if (choice == 2){
+            char from[NAME_SIZE];
+            char to[NAME_SIZE];
+
+            printf("From: ");
+            scanf(" %[^\n]", from);
+
+            printf("To: ");
+            scanf(" %[^\n]", to);
+
+            removeRoad(from, to);
+        }
+
+        else if (choice == 3){
+            displayRoads();
+        }
+        else if (choice == 4){
+            break;
+        }
+        else{
+            printf("Invalid choice!\n");
+        }
+    }
+}
+
+void mainMenu(){
+    int choice;
+    while (1){
+    printf("\n");
+    printf("====================================\n");
+    printf("        SMART ROUTE PLANNER         \n");
+    printf("====================================\n");
+
+        printf("1. Location Management\n");
+        printf("2. Road Management\n");
+        printf("3. Find Route\n");
+        printf("4. Traffic Management\n");
+        printf("5. Weather Management\n");
+        printf("6. View Road Network\n");
+        printf("7. Algorithm Comparison\n");
+        printf("8. Save Data\n");
+        printf("9. Exit\n");
+
+    printf("====================================\n");
+
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+
+        if (choice == 1){
+            locationMenu();
+        }
+        else if (choice == 2){
+            roadMenu();
+        }
+    else if (choice == 3){
+        
+    char startName[NAME_SIZE];
+    printf("\nEnter starting location: ");
+    scanf(" %[^\n]", startName);
+    int start = searchLocation(startName);
+    if (start == -1){
+        printf("Location not found!\n");
+    }
+    else{
+        BFS(start);
+    }
+}
+        else if (choice == 4){
+printf("Traffic management will be added later.\n");
+        }
+        else if (choice == 5){
+printf("Weather management will be added later.\n");
+        }
+        else if (choice == 6){
+            displayRoads();
+        }
+        else if (choice == 7){
+printf("Algorithm comparison will be added later.\n");
+        }
+        else if (choice == 8){
+printf("File handling will be added later.\n");
+        }
+        else if (choice == 9){
+printf("Exiting...\n");
+    break;
+        }
+        else{
+            printf("Invalid choice!\n");
+        }
+    }
+}
+ void freeGraph(){
+    for (int i=0; i<locationCount; i++){
+        edge *current = graph[i].roads;
+
+        while (current != NULL){
+            edge *temp = current;
+            current = current->next;
+            free(temp);
+        }
+    }
+}
+
+
+int main() {
+    
+    mainmenu();
+    freegraph();
+  
+    int n;
+    int roads;
+
+    char name[NAME_SIZE];
+    char from[NAME_SIZE];
+    char to[NAME_SIZE];
+
+    double distance;
+    double time;
+    double cost;
+
+    printf("Enter number of locations: ");
+    scanf("%d", &n);
+    printf("\nEnter location names:\n");
+    for(int i=0; i<n; i++){
+        printf("Location %d: ",i+1);
+        scanf(" %[^\n]", name);
+        addLocation(name);
+    }
+
+    printf("\nEnter number of roads: ");
+    scanf("%d", &roads);
+    
+    printf("\nEnter road information:\n");
+    for(int i=0; i<roads; i++){
+        printf("\nRoad %d\n", i + 1);
+
+        printf("From: ");
+        scanf(" %[^\n]", from);
+
+        printf("To: ");
+        scanf(" %[^\n]", to);
+
+        printf("Distance (km): ");
+        scanf("%lf", &distance);
+
+        printf("Time (minutes): ");
+        scanf("%lf", &time);
+
+        printf("Cost: ");
+        scanf("%lf", &cost);
+
+        addRoad(from, to, distance, time, cost);
+    }
+    
+      displayLocations();
+      displayRoads();
+      
+        freeGraph();
+        return 0;
+
+
+
+}
