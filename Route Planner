@@ -1143,7 +1143,6 @@ void loadData(){
     FILE *file;
     file = fopen("route_data.txt", "r");
     if (file == NULL){
-        printf("\nNo saved data found.\n");
         return;
     }
     for (int i = 0; i < locationCount; i++){
@@ -1370,11 +1369,7 @@ void fileMenu(){
 void mainMenu(){
     int choice;
     while (1){
-        printf("\n\n");
-        printf("========================================\n");
-        printf("             ROUTE PLANNER\n");
-        printf("========================================\n");
-
+        printf("\n");
         printf("1.  Location Management\n");
         printf("2.  Road Management\n");
         printf("3.  Graph Algorithms\n");
